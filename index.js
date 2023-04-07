@@ -4,6 +4,8 @@ const port = 5000;
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const nodemailer = require("nodemailer");
+const emailBody = require("./email");
 require("dotenv").config();
 
 // For app usage
@@ -52,9 +54,37 @@ async function run() {
     });
 
     app.post("/sendMail", async (req, res) => {
-      const email = req.body;
-      console.log(email);
-      res.send(true);
+      const email = req.body.email;
+      const plan = req.body.plan;
+      const message = emailBody(email, plan || "Basic");
+      try {
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+            user: `${process.env.ADMIN_EMAIL}`,
+            pass: `${process.env.ADMIN_PASS}`,
+          },
+        });
+
+        const mailOptions = {
+          from: `${process.env.ADMIN_EMAIL}`,
+          to: `${email}`,
+          subject: "Thank you for choosing Power-X-Gym!",
+          html: `${message}`,
+        };
+
+        transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            console.log(error);
+          } else {
+            console.log("Email sent: " + info.response);
+            // do something useful
+            res.send(true);
+          }
+        });
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     console.log(
