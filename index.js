@@ -35,6 +35,28 @@ async function run() {
     await client.connect();
     // Send a ping to confirm a successful connection
     await client.db(`${process.env.DATABASE_NAME}`).command({ ping: 1 });
+
+    const database = client.db(`${process.env.DATABASE_NAME}`);
+    const registeredUsersCollection = database.collection("registeredUsers");
+
+    // For inserting registered user data in database
+    app.post("/registerData", async (req, res) => {
+      const userData = req.body;
+      try {
+        const result = await registeredUsersCollection.insertOne(userData);
+        res.send(result.acknowledged);
+      } catch (error) {
+        console.log(error);
+        res.send(error.message);
+      }
+    });
+
+    app.post("/sendMail", async (req, res) => {
+      const email = req.body;
+      console.log(email);
+      res.send(true);
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
