@@ -98,6 +98,12 @@ async function run() {
       }
     });
 
+    // To get all registered user information
+    app.get("/allUserInfo", async (req, res) => {
+      const result = await registeredUsersCollection.find({}).toArray();
+      res.send(result);
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
