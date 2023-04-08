@@ -17,9 +17,21 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-// Mongodb connection
+// For admin checking
+app.post("/isAdmin", async (req, res) => {
+  const email = req.body.email;
+  const pass = req.body.password;
+  if (
+    email === `${process.env.ADMIN_PANEL_EMAIL}` &&
+    pass === `${process.env.ADMIN_PANEL_PASSWORD}`
+  ) {
+    res.send(true);
+  } else {
+    res.send(false);
+  }
+});
 
-// Replace the placeholder with your Atlas connection string
+// Mongodb connection
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.cfh8khq.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -33,9 +45,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server (optional starting in v4.7)
     await client.connect();
-    // Send a ping to confirm a successful connection
     await client.db(`${process.env.DATABASE_NAME}`).command({ ping: 1 });
 
     const database = client.db(`${process.env.DATABASE_NAME}`);
@@ -53,6 +63,7 @@ async function run() {
       }
     });
 
+    // For sending mail to the users
     app.post("/sendMail", async (req, res) => {
       const email = req.body.email;
       const plan = req.body.plan;
