@@ -6,12 +6,54 @@ const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const nodemailer = require("nodemailer");
 const emailBody = require("./email");
+const mongoose = require("mongoose");
+const User = require("./user");
+
 require("dotenv").config();
 
 // For app usage
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
+
+mongoose.connect(
+  `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.cfh8khq.mongodb.net/${process.env.DATABASE_NAME}?retryWrites=true&w=majority`
+);
+
+// To Get All Registered Users info
+app.get("/allUserInfo", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.send(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+// For inserting registered user data in database
+app.post("/registerData", async (req, res) => {
+  const userData = req.body;
+  try {
+    const newUser = new User(userData);
+    await newUser.save();
+    res.send(true);
+  } catch (error) {
+    console.log(error);
+    res.send(error.message);
+  }
+});
+
+//     // To get all registered user information
+app.get("/allUserInfo", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.send(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -57,7 +99,6 @@ app.post("/sendMail", async (req, res) => {
       if (error) {
         console.log(error);
       } else {
-        console.log("Email sent: " + info.response);
         // do something useful
         res.send(true);
       }
@@ -66,54 +107,6 @@ app.post("/sendMail", async (req, res) => {
     console.log(error);
   }
 });
-
-// Mongodb connection
-const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.cfh8khq.mongodb.net/?retryWrites=true&w=majority`;
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
-
-async function run() {
-  try {
-    await client.connect();
-    await client.db(`${process.env.DATABASE_NAME}`).command({ ping: 1 });
-
-    const database = client.db(`${process.env.DATABASE_NAME}`);
-    const registeredUsersCollection = database.collection("registeredUsers");
-
-    // For inserting registered user data in database
-    app.post("/registerData", async (req, res) => {
-      const userData = req.body;
-      try {
-        const result = await registeredUsersCollection.insertOne(userData);
-        res.send(result.acknowledged);
-      } catch (error) {
-        console.log(error);
-        res.send(error.message);
-      }
-    });
-
-    // To get all registered user information
-    app.get("/allUserInfo", async (req, res) => {
-      const result = await registeredUsersCollection.find({}).toArray();
-      res.send(result);
-    });
-
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
-  }
-}
-run().catch(console.dir);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
