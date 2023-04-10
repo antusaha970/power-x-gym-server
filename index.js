@@ -92,6 +92,17 @@ app.get("/blogData", async (req, res) => {
   }
 });
 
+// Get a specific blog
+app.get("/blogs/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    const blog = await Blog.findById(id);
+    res.send(blog);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 // Root directory
 app.get("/", (req, res) => {
   res.send("Hello World!");
