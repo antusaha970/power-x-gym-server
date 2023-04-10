@@ -5,6 +5,10 @@ const blogSchema = new mongoose.Schema({
   blogBody: String,
   author: String,
   image: Object,
+  publishDate: {
+    type: Date,
+    default: new Date(),
+  },
 });
 
 const Blog = mongoose.model("blog", blogSchema);
