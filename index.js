@@ -81,6 +81,17 @@ app.post("/postBlog", async (req, res) => {
   }
 });
 
+// Get all blog posts data
+app.get("/blogData", async (req, res) => {
+  try {
+    const blogData = await Blog.find();
+    res.send(blogData);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(404);
+  }
+});
+
 // Root directory
 app.get("/", (req, res) => {
   res.send("Hello World!");
