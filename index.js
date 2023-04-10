@@ -8,6 +8,9 @@ const nodemailer = require("nodemailer");
 const emailBody = require("./email");
 const mongoose = require("mongoose");
 const User = require("./user");
+const Blog = require("./blog");
+const fileUpload = require("express-fileupload");
+const fs = require("fs-extra");
 
 require("dotenv").config();
 
@@ -15,6 +18,7 @@ require("dotenv").config();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
+app.use(fileUpload());
 
 mongoose.connect(
   `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.cfh8khq.mongodb.net/${process.env.DATABASE_NAME}?retryWrites=true&w=majority`
@@ -44,7 +48,7 @@ app.post("/registerData", async (req, res) => {
   }
 });
 
-//     // To get all registered user information
+// To get all registered user information
 app.get("/allUserInfo", async (req, res) => {
   try {
     const users = await User.find();
@@ -55,6 +59,29 @@ app.get("/allUserInfo", async (req, res) => {
   }
 });
 
+// Blog post Data
+app.post("/postBlog", async (req, res) => {
+  const blogImg = req.files.file.data;
+  const encodedImg = blogImg.toString("base64");
+  const image = {
+    contentType: req.files.file.mimetype,
+    size: req.files.file.size,
+    img: Buffer.from(encodedImg, "base64"),
+  };
+  const blogDataForm = req.body.blogData;
+  const blogData = JSON.parse(blogDataForm);
+  const dataToStore = { ...blogData, image };
+  try {
+    const newBlog = new Blog(dataToStore);
+    await newBlog.save();
+    res.send(true);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(404);
+  }
+});
+
+// Root directory
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
