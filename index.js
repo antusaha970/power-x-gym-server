@@ -10,6 +10,7 @@ const mongoose = require("mongoose");
 const User = require("./user");
 const Blog = require("./blog");
 const fileUpload = require("express-fileupload");
+const ContactMessage = require("./contactUs");
 const fs = require("fs-extra");
 
 require("dotenv").config();
@@ -112,6 +113,19 @@ app.post("/deleteBlog", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(404).send(false);
+  }
+});
+
+// Post contact us message to server
+app.post("/userMessage", async (req, res) => {
+  const message = req.body;
+  try {
+    const userMessage = new ContactMessage(message);
+    await userMessage.save();
+    res.status(200).send(true);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(false);
   }
 });
 
