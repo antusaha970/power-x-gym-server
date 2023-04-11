@@ -103,6 +103,18 @@ app.get("/blogs/:id", async (req, res) => {
   }
 });
 
+// Delete a blog post
+app.post("/deleteBlog", async (req, res) => {
+  const id = req.body.id;
+  try {
+    const result = await Blog.deleteOne({ _id: id });
+    res.status(200).send(true);
+  } catch (error) {
+    console.log(error);
+    res.status(404).send(false);
+  }
+});
+
 // Root directory
 app.get("/", (req, res) => {
   res.send("Hello World!");
