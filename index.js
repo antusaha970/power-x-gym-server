@@ -28,7 +28,7 @@ app.use(
 app.use("/", require(path.join(__dirname, "./Routes/sendEmail/sendEmail")));
 app.use("/", require(path.join(__dirname, "./Routes/Admin/Admin")));
 
-// Root directory
+// Root call
 app.get("/", (req, res) => {
   res.send("This is a public api for power-x-gym");
 });
