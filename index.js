@@ -108,7 +108,7 @@ app.get("/blogs/:id", async (req, res) => {
 app.post("/deleteBlog", async (req, res) => {
   const id = req.body.id;
   try {
-    const result = await Blog.deleteOne({ _id: id });
+    await Blog.deleteOne({ _id: id });
     res.status(200).send(true);
   } catch (error) {
     console.log(error);
@@ -129,9 +129,20 @@ app.post("/userMessage", async (req, res) => {
   }
 });
 
+// Get contact us messages
+app.get("/memberMessages", async (req, res) => {
+  try {
+    const result = await ContactMessage.find();
+    res.send(result);
+  } catch (error) {
+    console.log(error);
+    res.status(404).send(error);
+  }
+});
+
 // Root directory
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("This is a public api for power-x-gym");
 });
 
 // For admin checking
